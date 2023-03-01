@@ -1,0 +1,99 @@
+{
+  "sshshell":{
+    "bind": ":2222",
+    "users": {
+      "user": {
+        "password": "notsecure"
+      }
+    },
+    "hostkeyfile": "./hostkey"
+  },
+  "chassis": {
+    "pktmbufs" : [{
+      "name": "MEMPOOL0",
+      "buffersize": 2304,
+      "poolsize": 32768,
+      "cachesize": 256,
+      "cpuid": 0
+    }],
+    "interfaces" : [{
+      "name": "sw1",
+      "tap": {
+        "rx": {
+          "pktmbuf": "MEMPOOL0",
+          "mtu": 1514
+        }
+      }
+    },{
+      "name": "sw2",
+      "tap": {
+        "rx": {
+          "pktmbuf": "MEMPOOL0",
+          "mtu": 1514
+        }
+      }
+    }],
+    "pipelines" :[{
+      "name": "PIPELINE0",
+      "numanode": 0,
+      "threadid": 1,
+      "spec": "./dash.spec",
+      "inputports": [{
+        "ifacename": "sw1",
+        "rxqueue": 0,
+        "bsz": 1
+      },{
+        "ifacename": "sw2",
+        "rxqueue": 0,
+        "bsz": 1
+      }],
+      "outputports": [{
+        "ifacename": "sw1",
+        "txqueue": 0,
+        "bsz": 1
+      },{
+        "ifacename": "sw2",
+        "txqueue": 0,
+        "bsz": 1
+      }],
+      "start": {
+        "tables": [{
+          "name": "ipv4_host",
+          "data": [
+            "match 0xc0a8de01 action send port 0",
+            "match 0xc0a8de02 action send port 1"
+          ]
+        }]
+      }
+    }]
+  },
+  "logging": {
+    "loggers": {
+      "root": {
+        "level": "info",
+        "output": {
+          "stdout": {
+            "sink": "stdout"
+          },
+          "file": {
+            "sink": "file"
+          }
+        }
+      }
+    },
+    "sinks": {
+      "stdout": {
+        "type": "stdout",
+        "encoding": "console",
+        "stdout": {}
+      },
+      "file": {
+        "type": "file",
+        "encoding": "json",	
+        "file": {
+          "path": "./test.log"
+        }
+      }
+    }
+  }
+}
